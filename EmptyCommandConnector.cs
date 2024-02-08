@@ -38,9 +38,13 @@ namespace EmptyCommand
         private static class CommandContext<T>
             where T : struct, ICommand
         {
+            private static object Command;
+            private static MethodBase CloneMethod;
+            private static int CommandID;
+
             static CommandContext()
             {
-                object command = Activator.CreateInstance(typeof(T));
+                Command = Activator.CreateInstance(typeof(T));
 
                 var fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
@@ -48,7 +52,7 @@ namespace EmptyCommand
                 {
                     if (fields[i].FieldType.GetInterface(nameof(ICommandReciver)) != null)
                     {
-                        fields[i].SetValue(command, Convert.ChangeType(GetCommandReciver(fields[i].FieldType), fields[i].FieldType));
+                        fields[i].SetValue(Command, Convert.ChangeType(GetCommandReciver(fields[i].FieldType), fields[i].FieldType));
                     }
                 }
 
@@ -58,14 +62,25 @@ namespace EmptyCommand
                 {
                     if(properties[i].PropertyType.GetInterface(nameof(ICommandReciver)) != null)
                     {
-                        properties[i].SetValue(command, Convert.ChangeType(GetCommandReciver(fields[i].FieldType), fields[i].FieldType));
+                        properties[i].SetValue(Command, Convert.ChangeType(GetCommandReciver(fields[i].FieldType), fields[i].FieldType));
                     }
                 }
 
-                CommandImplementation = (T)command;
+                CloneMethod = typeof(T).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
+                var random = new Random();
+                CommandID = random.Next(-999, 999);
+                
             }
 
-            public static T CommandImplementation { get; }
+            public static T CommandImplementation
+            {
+                get
+                {
+                    var command = (T) CloneMethod.Invoke(Command, null);
+                    command.ID = CommandID;
+                    return command;
+                }
+            }
         }
     }
 }
