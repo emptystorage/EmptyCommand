@@ -40,7 +40,6 @@ namespace EmptyCommand
         {
             private static object Command;
             private static MethodBase CloneMethod;
-            private static int CommandID;
 
             static CommandContext()
             {
@@ -68,7 +67,6 @@ namespace EmptyCommand
 
                 CloneMethod = typeof(T).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
                 var random = new Random();
-                CommandID = random.Next(-999, 999);
                 
             }
 
@@ -77,7 +75,6 @@ namespace EmptyCommand
                 get
                 {
                     var command = (T) CloneMethod.Invoke(Command, null);
-                    command.ID = CommandID;
                     return command;
                 }
             }
