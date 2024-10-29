@@ -66,8 +66,6 @@ namespace EmptyCommand
                 }
 
                 CloneMethod = typeof(T).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
-                var random = new Random();
-                
             }
 
             public static T CommandImplementation
